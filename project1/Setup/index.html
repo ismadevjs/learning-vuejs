@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Monster Slayer</title>
+    <script src="https://npmcdn.com/vue/dist/vue.js"></script>
+    <link rel="stylesheet" href="css/foundation.min.css" />
+    <link rel="stylesheet" href="css/app.css" />
+  </head>
+  <body>
+    <div id="app">
+      <section class="row">
+        <div class="small-6 columns">
+          <h1 class="text-center">YOU</h1>
+          <div class="healthbar">
+            <div
+              :style="{width : youHealth+'%'}"
+              class="healthbar text-center"
+              style="background-color: green; margin: 0; color: white"
+            ></div>
+          </div>
+        </div>
+        <div class="small-6 columns">
+          <h1 class="text-center">MONSTER</h1>
+          <div class="healthbar">
+            <div
+              :style="{width : monsterHealth+'%'}"
+              class="healthbar text-center"
+              style="background-color: green; margin: 0; color: white"
+            ></div>
+          </div>
+        </div>
+      </section>
+      <section class="row controls" v-if="!show">
+        <div class="small-12 columns">
+          <button id="start-game" @click="show = !show">Start New game</button>
+        </div>
+      </section>
+      <section class="row controls" v-if="show">
+        <div class="small-12 columns">
+          <button id="attack" @click="attack">ATTACK</button>
+          <button id="special-attack" @click="specialAttack">
+            SPECIAL ATTACK
+          </button>
+          <button id="heal" @click="heal">HEAL</button>
+          <button id="give-up" @click="giveUp">GIVE UP</button>
+        </div>
+      </section>
+      <section class="row log" v-if="show">
+        <div class="small-12 columns">
+          <ul>
+            <li v-for="log in logs">
+              <p
+                :class="[ log.name == 'player' ? 'player-turn' : 'monster-turn' ]"
+              >
+                {{log.name}} hit playe for {{ log.attack }}
+              </p>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </div>
+  </body>
+
+  <script type="module">
+    import { createApp } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+
+    createApp({
+      data() {
+        return {
+          show: false,
+          monsterHealth: 100,
+          youHealth: 100,
+          attackVal: 15,
+          logMonster: 0,
+          logPlayer: 0,
+          logs: [],
+        };
+      },
+      methods: {
+        whoWin() {
+          if (this.monsterHealth <= 0) {
+            alert("You Win!!!!!!!!!");
+            this.giveUp();
+          }
+          if (this.youHealth <= 0) {
+            this.giveUp();
+            alert("You Lose!!!!!!!!!");
+          }
+        },
+        attacks(type) {
+          this.logs.push({
+            name: "monster",
+            attack: (this.logMonster = Math.floor(
+              Math.random() * this.attackVal + type
+            )),
+          });
+          this.logs.push({
+            name: "player",
+            attack: (this.logPlayer = Math.floor(
+              Math.random() * this.attackVal + type
+            )),
+          });
+
+          this.monster = this.monsterHealth -= this.logMonster;
+          this.player = this.youHealth -= this.logPlayer;
+        },
+
+        attack() {
+          this.whoWin();
+          this.attacks(Math.floor(Math.random() * 10));
+        },
+        specialAttack() {
+          this.whoWin();
+          this.attacks(Math.floor(Math.random() * 20));
+        },
+        heal() {
+          this.whoWin();
+          if (this.youHealth >= 100) this.youHealth = 90;
+          this.youHealth -= Math.floor(Math.random() * this.attackVal);
+          this.youHealth += Math.floor(Math.random() * this.attackVal + 2);
+        },
+        giveUp() {
+          this.logs = [];
+          this.monsterHealth = 100;
+          this.youHealth = 100;
+          this.logMonster = 0;
+          this.logPlayer = 0;
+          this.show = !this.show;
+          this.giveUp();
+        },
+      },
+    }).mount("#app");
+  </script>
+</html>
